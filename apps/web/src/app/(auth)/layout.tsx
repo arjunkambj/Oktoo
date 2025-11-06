@@ -7,11 +7,8 @@ interface AuthLayoutProps {
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="flex min-h-dvh flex">
-      <div className="w-full h-full flex justify-center items-center">
-        {children}
-      </div>
       <div className="w-full min-h-full flex justify-center items-center p-6">
-        <div className="w-full h-full flex flex-col justify-center rounded-4xl bg-default-100 p-12">
+        <div className="w-full h-full flex flex-col justify-center rounded-4xl bg-default-100 p-12 relative">
           <div className="max-w-xl space-y-8">
             <div className="space-y-6">
               <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight">
@@ -26,13 +23,16 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
                 sed do eiusmod tempor
               </p>
             </div>
-            <div className="pt-12 border-t border-default-200">
-              <p className="text-sm text-default-500">
+            <div className="pt-12  border-t border-default-200">
+              <p className="text-sm text-default-500 absolute bottom-5 left-12">
                 © {new Date().getFullYear()} Meyoo. All rights reserved.
               </p>
             </div>
           </div>
         </div>
+      </div>
+      <div className="w-full h-full flex justify-center items-center">
+        {children}
       </div>
     </div>
   );

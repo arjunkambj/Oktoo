@@ -45,12 +45,12 @@ const defaultSections = [
 
 const defaultSocialLinks = [
   {
-    icon: <Icon icon="lucide:instagram" className="size-5" />,
+    icon: <Icon icon="hugeicons:instagram" width={22} />,
     href: "https://www.instagram.com/vedictrades",
     label: "Instagram",
   },
   {
-    icon: <Icon icon="lucide:twitter" className="size-5" />,
+    icon: <Icon icon="hugeicons:new-twitter" width={22} />,
     href: "#https://x.com/vedictrades",
     label: "Twitter",
   },
@@ -73,7 +73,7 @@ const Footer = ({
             <p className="text-muted-foreground max-w-[70%] text-sm">
               {description}
             </p>
-            <ul className="text-muted-foreground flex items-center space-x-6">
+            <ul className="text-muted-foreground flex items-center space-x-4">
               {socialLinks.map(
                 (
                   social: {

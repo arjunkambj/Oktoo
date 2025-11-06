@@ -119,8 +119,7 @@ export const FetchMetaLeads = async (
 // Subscribe page to webhooks for real-time lead updates
 export const SubscribePageToWebhooks = async (
   pageId: string,
-  pageAccessToken: string,
-  callbackUrl: string
+  pageAccessToken: string
 ) => {
   const response = await fetch(`${META_GRAPH_URL}/${pageId}/subscribed_apps`, {
     method: "POST",

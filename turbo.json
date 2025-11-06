@@ -1,7 +1,18 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "globalEnv": ["NEXT_PUBLIC_CONVEX_URL"],
+  "globalEnv": [
+    "NEXT_PUBLIC_CONVEX_URL",
+    "NEXT_PUBLIC_STACK_PROJECT_ID",
+    "NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY",
+    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_META_CLIENT_ID",
+    "UPSTASH_REDIS_REST_URL",
+    "UPSTASH_REDIS_REST_TOKEN",
+    "CONVEX_DEPLOYMENT",
+    "STACK_SECRET_SERVER_KEY",
+    "META_CLIENT_SECRET"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

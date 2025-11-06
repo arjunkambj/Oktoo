@@ -3,7 +3,7 @@ import { v } from "convex/values";
 
 const schema = defineSchema({
   Integrations: defineTable({
-    orgId: v.string(),
+    teamId: v.id("teams"),
 
     integrationType: v.union(
       v.literal("meta"),
@@ -17,10 +17,10 @@ const schema = defineSchema({
 
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("byOrgId", ["orgId"]),
+  }).index("byTeamId", ["teamId"]),
 
   metaForms: defineTable({
-    orgId: v.string(),
+    teamId: v.id("teams"),
     metaFormId: v.string(),
     formName: v.string(),
 
@@ -32,7 +32,7 @@ const schema = defineSchema({
 
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("byOrgId", ["orgId"]),
+  }).index("byTeamId", ["teamId"]),
 
   metaWebhookEvents: defineTable({
     eventId: v.string(),
@@ -42,7 +42,7 @@ const schema = defineSchema({
   }),
 
   leads: defineTable({
-    orgId: v.string(),
+    teamId: v.id("teams"),
     metaFormId: v.id("metaForms"),
     metaFormSubmissionId: v.string(),
     fullName: v.optional(v.string()),
@@ -56,7 +56,7 @@ const schema = defineSchema({
 
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("byOrgId", ["orgId"]),
+  }).index("byTeamId", ["teamId"]),
 });
 
 export default schema;

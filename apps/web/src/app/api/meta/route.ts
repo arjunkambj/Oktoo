@@ -1,9 +1,10 @@
 import { NextResponse, NextRequest } from "next/server";
+
 import {
   FetchMetaAccessToken,
   FetchMetaRefreshToken,
-  VerifyMetaState,
 } from "@/integration/meta";
+import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
@@ -14,8 +15,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "State is required" }, { status: 400 });
   }
 
-  const verifiedState = await VerifyMetaState(state);
-  if (!verifiedState) {
+  const cookieStore = await cookies();
+  const cookieState = cookieStore.get("meta:state");
+
+  if (!cookieState || cookieState.value !== state) {
     return NextResponse.json({ error: "Invalid state" }, { status: 400 });
   }
 
@@ -26,5 +29,5 @@ export async function GET(request: NextRequest) {
     accessTokenData.access_token
   );
 
-  return NextResponse.json({ success: true, data: longLivedAccessTokenData });
+  return NextResponse.json(longLivedAccessTokenData);
 }

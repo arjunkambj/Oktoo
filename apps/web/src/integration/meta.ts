@@ -1,5 +1,5 @@
 import { env } from "@/lib/env";
-import { cookies } from "next/headers";
+
 const META_API_VERSION = "v24.0";
 const META_GRAPH_URL = `https://graph.facebook.com/${META_API_VERSION}`;
 
@@ -48,16 +48,4 @@ export const FetchMetaRefreshToken = async (shortLivedToken: string) => {
 
   const data = await response.json();
   return data;
-};
-
-export const VerifyMetaState = async (state: string) => {
-  const cookieStore = await cookies();
-  const cookieState = cookieStore.get("meta:state");
-  if (!cookieState) {
-    return false;
-  }
-  if (cookieState.value !== state) {
-    return false;
-  }
-  return true;
 };

@@ -49,3 +49,111 @@ export const FetchMetaRefreshToken = async (shortLivedToken: string) => {
   const data = await response.json();
   return data;
 };
+
+///////////////////// Need to Review these functions /////////////////////
+
+// Fetch user's business accounts
+export const FetchMetaBusinessAccounts = async (accessToken: string) => {
+  const response = await fetch(
+    `${META_GRAPH_URL}/me/businesses?fields=id,name,verification_status&access_token=${accessToken}`
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch business accounts: ${response.statusText}`
+    );
+  }
+
+  const data = await response.json();
+  return data;
+};
+
+// Fetch pages associated with a business or user
+export const FetchMetaPages = async (accessToken: string) => {
+  const response = await fetch(
+    `${META_GRAPH_URL}/me/accounts?fields=id,name,access_token,category,tasks&access_token=${accessToken}`
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch pages: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data;
+};
+
+// Fetch lead forms for a specific page
+export const FetchMetaLeadForms = async (
+  pageId: string,
+  pageAccessToken: string
+) => {
+  const response = await fetch(
+    `${META_GRAPH_URL}/${pageId}/leadgen_forms?fields=id,name,status,leads_count,created_time&access_token=${pageAccessToken}`
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch lead forms: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data;
+};
+
+// Fetch leads for a specific lead form
+export const FetchMetaLeads = async (
+  formId: string,
+  pageAccessToken: string
+) => {
+  const response = await fetch(
+    `${META_GRAPH_URL}/${formId}/leads?fields=id,created_time,field_data&access_token=${pageAccessToken}`
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch leads: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data;
+};
+
+// Subscribe page to webhooks for real-time lead updates
+export const SubscribePageToWebhooks = async (
+  pageId: string,
+  pageAccessToken: string,
+  callbackUrl: string
+) => {
+  const response = await fetch(`${META_GRAPH_URL}/${pageId}/subscribed_apps`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      subscribed_fields: ["leadgen"],
+      access_token: pageAccessToken,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to subscribe to webhooks: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data;
+};
+
+// Get a specific lead by ID
+export const FetchMetaLeadById = async (
+  leadId: string,
+  pageAccessToken: string
+) => {
+  const response = await fetch(
+    `${META_GRAPH_URL}/${leadId}?fields=id,created_time,field_data&access_token=${pageAccessToken}`
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch lead: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data;
+};

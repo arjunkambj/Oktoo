@@ -48,7 +48,15 @@ export const createMetaOAuthUrl = async (state: string) => {
   url.searchParams.set("state", state);
   url.searchParams.set(
     "scope",
-    "leads.read_user_data,leads.read_user_targeting_criteria"
+    [
+      "business_management",
+      "pages_show_list",
+      "pages_manage_metadata",
+      "leads_retrieval",
+      "ads_read",
+      "public_profile",
+      "email",
+    ].join(",")
   );
   return url.toString();
 };

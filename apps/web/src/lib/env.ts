@@ -8,6 +8,7 @@ export const env = createEnv({
     META_CLIENT_SECRET: z.string().min(1),
     UPSTASH_REDIS_REST_URL: z.url(),
     UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
+    META_WEBHOOK_URL: z.url(),
   },
   client: {
     NEXT_PUBLIC_CONVEX_URL: z.url(),
@@ -22,6 +23,7 @@ export const env = createEnv({
     CONVEX_DEPLOYMENT: process.env.CONVEX_DEPLOYMENT,
     STACK_SECRET_SERVER_KEY: process.env.STACK_SECRET_SERVER_KEY,
     META_CLIENT_SECRET: process.env.META_CLIENT_SECRET,
+    META_WEBHOOK_URL: process.env.META_WEBHOOK_URL,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_META_CLIENT_ID: process.env.NEXT_PUBLIC_META_CLIENT_ID,
     NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,

@@ -8,6 +8,9 @@
  * @module
  */
 
+import type * as core_integration from "../core/integration.js";
+import type * as meta_action from "../meta/action.js";
+
 import type {
   ApiFromModules,
   FilterApi,
@@ -22,7 +25,10 @@ import type {
  * const myFunctionReference = api.myModule.myFunction;
  * ```
  */
-declare const fullApi: ApiFromModules<{}>;
+declare const fullApi: ApiFromModules<{
+  "core/integration": typeof core_integration;
+  "meta/action": typeof meta_action;
+}>;
 declare const fullApiWithMounts: typeof fullApi;
 
 export declare const api: FilterApi<

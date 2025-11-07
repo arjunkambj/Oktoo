@@ -1,9 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-
-import {
-  FetchMetaAccessToken,
-  FetchMetaRefreshToken,
-} from "@/integration/meta";
+import { FetchMetaAccessToken } from "@/integration/meta";
 import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest) {
@@ -15,6 +11,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "State is required" }, { status: 400 });
   }
 
+  console.log("state and code received Step 1");
+
   const cookieStore = await cookies();
   const cookieState = cookieStore.get("meta:state");
 
@@ -23,11 +21,9 @@ export async function GET(request: NextRequest) {
   }
 
   const accessTokenData = await FetchMetaAccessToken(code);
-  console.log("Getting access token", accessTokenData);
 
-  const longLivedAccessTokenData = await FetchMetaRefreshToken(
-    accessTokenData.access_token
-  );
-
-  return NextResponse.json(longLivedAccessTokenData);
+  return NextResponse.json({
+    success: true,
+    data: accessTokenData,
+  });
 }

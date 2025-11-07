@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { FetchMetaAccessToken } from "@/integration/meta";
 import { cookies } from "next/headers";
+import { redis } from "@/lib/redis";
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
@@ -17,6 +18,14 @@ export async function GET(request: NextRequest) {
   const cookieState = cookieStore.get("meta:state");
 
   if (!cookieState || cookieState.value !== state) {
+    return NextResponse.json({ error: "Invalid state" }, { status: 400 });
+  }
+
+  const cachedState = await redis.get<{ userId: string; teamId: string }>(
+    state
+  );
+
+  if (!cachedState) {
     return NextResponse.json({ error: "Invalid state" }, { status: 400 });
   }
 

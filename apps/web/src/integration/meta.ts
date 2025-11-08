@@ -6,6 +6,7 @@ const META_GRAPH_URL = `https://graph.facebook.com/${META_API_VERSION}`;
 const redirectUri = `${env.NEXT_PUBLIC_APP_URL}/api/meta/`;
 
 export const FetchMetaAccessToken = async (code: string) => {
+  console.log("[FetchMetaAccessToken] Step 1: Preparing Meta OAuth token request");
   const response = await fetch(`${META_GRAPH_URL}/oauth/access_token`, {
     method: "POST",
     headers: {
@@ -21,12 +22,14 @@ export const FetchMetaAccessToken = async (code: string) => {
   });
 
   if (!response.ok) {
+    console.log("[FetchMetaAccessToken] Error: Failed to fetch access token", response.statusText);
     throw new Error(
       `Failed to fetch Meta access token: ${response.statusText}`
     );
   }
 
+  console.log("[FetchMetaAccessToken] Step 2: Parsing access token response");
   const data = await response.json();
-  console.log("access token data", data);
+  console.log("[FetchMetaAccessToken] Step 3: Access token received successfully", data);
   return data;
 };

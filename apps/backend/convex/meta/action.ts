@@ -1,9 +1,11 @@
 import { v } from "convex/values";
-import { action } from "../_generated/server";
+import { action, internalAction } from "../_generated/server";
 import { httpAction } from "../_generated/server";
 import { fetchMetaPages, fetchMetaForms } from "./utils";
 import { internal } from "../_generated/api";
+import { components } from "../_generated/api";
 import { z } from "zod";
+import { Workpool } from "@convex-dev/workpool";
 
 const MetaPageSchema = z.object({
   id: z.string(),
@@ -15,6 +17,16 @@ const MetaPageSchema = z.object({
 const MetaFormSchema = z.object({
   id: z.string(),
   name: z.string(),
+});
+
+const metaWorkpool = new Workpool(components.MetaLeadsWorkpool, {
+  maxParallelism: 5,
+  retryActionsByDefault: true,
+  defaultRetryBehavior: {
+    maxAttempts: 3,
+    initialBackoffMs: 1000,
+    base: 2,
+  },
 });
 
 export const handleMetaCallback = action({
@@ -37,33 +49,30 @@ export const handleMetaCallback = action({
     const PagesResponse = await fetchMetaPages(accessToken);
     const metaPages = z.array(MetaPageSchema).parse(PagesResponse.data);
 
-    for (const metaPage of metaPages) {
-      await ctx.runMutation(internal.meta.internal.saveMetaPage, {
-        teamId,
-        page: metaPage,
-      });
-    }
+    await Promise.all(
+      metaPages.map((metaPage) =>
+        metaWorkpool.enqueueMutation(ctx, internal.meta.internal.saveMetaPage, {
+          teamId,
+          page: metaPage,
+        })
+      )
+    );
 
-    for (const metaPage of metaPages) {
-      const FormsResponse = await fetchMetaForms(
-        metaPage.id,
-        metaPage.access_token
-      );
-
-      if (FormsResponse.data.length > 0) {
-        const metaForms = z.array(MetaFormSchema).parse(FormsResponse.data);
-        for (const metaForm of metaForms) {
-          await ctx.runMutation(internal.meta.internal.saveMetaForm, {
+    await Promise.all(
+      metaPages.map((metaPage) =>
+        metaWorkpool.enqueueAction(
+          ctx,
+          internal.meta.action.processPageForms,
+          {
             teamId,
-            metaPageId: metaPage.id,
-            form: {
-              id: metaForm.id,
-              name: metaForm.name,
-            },
-          });
-        }
-      }
-    }
+            metaPage,
+          },
+          {
+            retry: true,
+          }
+        )
+      )
+    );
 
     await ctx.runMutation(
       internal.core.integration.updatesecuessfullyIntegrated,
@@ -72,6 +81,47 @@ export const handleMetaCallback = action({
         integrationType: "meta",
       }
     );
+  },
+});
+
+export const processPageForms = internalAction({
+  args: {
+    teamId: v.string(),
+    metaPage: v.object({
+      id: v.string(),
+      name: v.string(),
+      access_token: v.string(),
+      category: v.string(),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const { teamId, metaPage } = args;
+
+    const FormsResponse = await fetchMetaForms(
+      metaPage.id,
+      metaPage.access_token
+    );
+
+    if (FormsResponse.data.length > 0) {
+      const metaForms = z.array(MetaFormSchema).parse(FormsResponse.data);
+
+      await Promise.all(
+        metaForms.map((metaForm) =>
+          metaWorkpool.enqueueMutation(
+            ctx,
+            internal.meta.internal.saveMetaForm,
+            {
+              teamId,
+              metaPageId: metaPage.id,
+              form: {
+                id: metaForm.id,
+                name: metaForm.name,
+              },
+            }
+          )
+        )
+      );
+    }
   },
 });
 

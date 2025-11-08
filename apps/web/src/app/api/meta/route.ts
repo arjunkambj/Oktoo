@@ -9,7 +9,9 @@ import { env } from "@/lib/env";
 const convex = new ConvexHttpClient(env.CONVEX_URL);
 
 export async function GET(request: NextRequest) {
-  console.log("[API Meta Route] Step 1: Extracting state and code from request");
+  console.log(
+    "[API Meta Route] Step 1: Extracting state and code from request"
+  );
   const params = request.nextUrl.searchParams;
   const state = params.get("state");
   const code = params.get("code");
@@ -41,8 +43,10 @@ export async function GET(request: NextRequest) {
   console.log("[API Meta Route] Step 4: Fetching Meta access token");
   const accessTokenData = await FetchMetaAccessToken(code);
 
-  console.log("[API Meta Route] Step 5: Calling Convex syncMetaIntegration action");
-  await convex.action(api.meta.action.syncMetaIntegration, {
+  console.log(
+    "[API Meta Route] Step 5: Calling Convex syncMetaIntegration action"
+  );
+  await convex.action(api.meta.action.handleMetaCallback, {
     teamId: cachedState.teamId,
     userId: cachedState.userId,
     accessToken: accessTokenData.access_token,

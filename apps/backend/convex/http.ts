@@ -1,17 +1,12 @@
 import { httpRouter } from "convex/server";
-import { metaWebhookGet, metaWebhookPost } from "./meta";
+import { handleMetaWebhook } from "./meta/action";
 
 const http = httpRouter();
 
 http.route({
   path: "/meta/webhook",
-  method: "GET",
-  handler: metaWebhookGet,
+  method: "POST",
+  handler: handleMetaWebhook,
 });
 
-http.route({
-  path: "/meta/webhook",
-  method: "POST",
-  handler: metaWebhookPost,
-});
 export default http;

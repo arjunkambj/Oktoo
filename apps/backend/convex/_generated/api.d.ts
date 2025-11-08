@@ -11,12 +11,7 @@
 import type * as core_integration from "../core/integration.js";
 import type * as http from "../http.js";
 import type * as meta_action from "../meta/action.js";
-import type * as meta_index from "../meta/index.js";
-import type * as meta_leads from "../meta/leads.js";
-import type * as meta_mutation from "../meta/mutation.js";
-import type * as meta_query from "../meta/query.js";
 import type * as meta_utils from "../meta/utils.js";
-import type * as meta_webhook from "../meta/webhook.js";
 
 import type {
   ApiFromModules,
@@ -36,12 +31,7 @@ declare const fullApi: ApiFromModules<{
   "core/integration": typeof core_integration;
   http: typeof http;
   "meta/action": typeof meta_action;
-  "meta/index": typeof meta_index;
-  "meta/leads": typeof meta_leads;
-  "meta/mutation": typeof meta_mutation;
-  "meta/query": typeof meta_query;
   "meta/utils": typeof meta_utils;
-  "meta/webhook": typeof meta_webhook;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
@@ -55,7 +45,7 @@ export declare const internal: FilterApi<
 >;
 
 export declare const components: {
-  metaWorkpool: {
+  MetaLeadsWorkpool: {
     lib: {
       cancel: FunctionReference<
         "mutation",

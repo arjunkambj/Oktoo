@@ -13,7 +13,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import type { Id } from "@repo/backend/convex/_generated/dataModel";
-
+import { useAction } from "convex/react";
 export default function SelectForm({ teamId }: { teamId: string }) {
   const router = useRouter();
 
@@ -52,6 +52,8 @@ export default function SelectForm({ teamId }: { teamId: string }) {
     });
   };
 
+  const fetchInitialLeads = useAction(api.meta.action.fetchInitialLeads);
+
   const handleContinue = async () => {
     setIsLoading(true);
     if (selectedFormIds.size === 0) return;
@@ -62,6 +64,10 @@ export default function SelectForm({ teamId }: { teamId: string }) {
     });
 
     updateOnboardingStep({
+      teamId,
+    });
+
+    await fetchInitialLeads({
       teamId,
     });
 

@@ -239,3 +239,24 @@ export const completeOnboarding = mutation({
     }
   },
 });
+
+export const updateLeadsSynced = internalMutation({
+  args: {
+    teamId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { teamId } = args;
+
+    const onboarding = await ctx.db
+      .query("onboarding")
+      .withIndex("byTeamId", (q) => q.eq("teamId", teamId))
+      .first();
+
+    if (onboarding) {
+      await ctx.db.patch(onboarding._id, {
+        hasSyncedLeads: true,
+      });
+    }
+    return true;
+  },
+});

@@ -119,7 +119,28 @@ export const processPageForms = internalAction({
   },
 });
 
-/// TODO Nedd to add Auth
+const MetaLeadSchema = z.object({
+  id: z.string(),
+  created_time: z.string(),
+  field_data: z.array(
+    z.object({
+      name: z.string(),
+      values: z.array(z.string()),
+    })
+  ),
+  form_id: z.string().optional(),
+  page_id: z.string().optional(),
+  is_organic: z.boolean().optional(),
+  ad_id: z.string().optional(),
+  ad_name: z.string().optional(),
+  adset_id: z.string().optional(),
+  adset_name: z.string().optional(),
+  adgroup_id: z.string().optional(),
+  adgroup_name: z.string().optional(),
+  campaign_id: z.string().optional(),
+  campaign_name: z.string().optional(),
+});
+
 export const fetchInitialLeads = action({
   args: {
     teamId: v.string(),
@@ -134,7 +155,44 @@ export const fetchInitialLeads = action({
       }
     );
 
-    console.log(primaryMetaForms);
+    await Promise.all(
+      primaryMetaForms.map((metaForm) =>
+        metaWorkpool.enqueueAction(
+          ctx,
+          internal.meta.action.processFormLeads,
+          {
+            teamId,
+            metaFormId: metaForm._id,
+            formId: metaForm.formId,
+            pageAccessToken: metaForm.pageAccessToken,
+          },
+          {
+            retry: true,
+          }
+        )
+      )
+    );
+
+    await ctx.runMutation(internal.core.onboarding.updateLeadsSynced, {
+      teamId,
+    });
+  },
+});
+
+export const processFormLeads = internalAction({
+  args: {
+    teamId: v.string(),
+    metaFormId: v.id("metaForms"),
+    formId: v.string(),
+    pageAccessToken: v.string(),
+    since: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const { teamId, metaFormId, formId, pageAccessToken, since } = args;
+
+    const leadsResponse = await fetchMetaLeads(formId, pageAccessToken, since);
+
+    console.log(leadsResponse);
   },
 });
 

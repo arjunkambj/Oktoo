@@ -34,12 +34,20 @@ export const fetchMetaForms = async (pageId: string, accessToken: string) => {
   return forms.json();
 };
 
-export const fetchMetaLeads = async (formId: string, accessToken: string) => {
-  const leads = await fetch(
-    `${META_GRAPH_URL}/${formId}/leads?access_token=${accessToken}&fields=${LEAD_FIELDS.join(",")}`
-  );
+export const fetchMetaLeads = async (
+  formId: string,
+  accessToken: string,
+  since?: number
+) => {
+  const url = new URL(`${META_GRAPH_URL}/${formId}/leads`);
+  url.searchParams.append("access_token", accessToken);
+  url.searchParams.append("fields", LEAD_FIELDS.join(","));
 
-  console.log(leads);
+  if (since) {
+    url.searchParams.append("since", Math.floor(since / 1000).toString());
+  }
+
+  const leads = await fetch(url.toString());
   return leads.json();
 };
 

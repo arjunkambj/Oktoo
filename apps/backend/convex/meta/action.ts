@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { action, internalAction } from "../_generated/server";
 import { httpAction } from "../_generated/server";
-import { fetchMetaPages, fetchMetaForms } from "./utils";
+import { fetchMetaPages, fetchMetaForms, fetchMetaLeads } from "./utils";
 import { internal } from "../_generated/api";
 import { components } from "../_generated/api";
 import { z } from "zod";
@@ -116,6 +116,25 @@ export const processPageForms = internalAction({
         )
       );
     }
+  },
+});
+
+/// TODO Nedd to add Auth
+export const fetchInitialLeads = action({
+  args: {
+    teamId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { teamId } = args;
+
+    const primaryMetaForms = await ctx.runQuery(
+      internal.meta.internal.getPrimaryMetaForms,
+      {
+        teamId,
+      }
+    );
+
+    console.log(primaryMetaForms);
   },
 });
 

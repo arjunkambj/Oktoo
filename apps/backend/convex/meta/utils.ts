@@ -1,6 +1,23 @@
 export const META_API_VERSION = "v24.0";
 export const META_GRAPH_URL = `https://graph.facebook.com/${META_API_VERSION}`;
 
+const LEAD_FIELDS = [
+  "id",
+  "created_time",
+  "field_data",
+  "form_id",
+  "page_id",
+  "is_organic",
+  "ad_id",
+  "ad_name",
+  "adset_id",
+  "adset_name",
+  "adgroup_id",
+  "adgroup_name",
+  "campaign_id",
+  "campaign_name",
+];
+
 export const fetchMetaPages = async (accessToken: string) => {
   const pages = await fetch(
     `${META_GRAPH_URL}/me/accounts?access_token=${accessToken}&fields=id,name,access_token,category`
@@ -15,4 +32,22 @@ export const fetchMetaForms = async (pageId: string, accessToken: string) => {
   );
 
   return forms.json();
+};
+
+export const fetchMetaLeads = async (formId: string, accessToken: string) => {
+  const leads = await fetch(
+    `${META_GRAPH_URL}/${formId}/leads?access_token=${accessToken}&fields=${LEAD_FIELDS.join(",")}`
+  );
+
+  console.log(leads);
+  return leads.json();
+};
+
+export const fetchSingleLead = async (leadId: string, accessToken: string) => {
+  const lead = await fetch(
+    `${META_GRAPH_URL}/${leadId}?access_token=${accessToken}&fields=${LEAD_FIELDS.join(",")}`
+  );
+
+  console.log(lead);
+  return lead.json();
 };

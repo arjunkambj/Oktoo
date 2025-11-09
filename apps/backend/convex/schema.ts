@@ -48,10 +48,12 @@ const schema = defineSchema({
   })
     .index("byTeamId", ["teamId"])
     .index("byTeamIdAndMetaPageId", ["teamId", "metaPageId"])
-    .index(
-      "byTeamIdAndMetaPageIdAndFormId",
-      ["teamId", "metaPageId", "formId"]
-    ),
+    .index("byTeamIdAndisprimary", ["teamId", "isPrimary"])
+    .index("byTeamIdAndMetaPageIdAndFormId", [
+      "teamId",
+      "metaPageId",
+      "formId",
+    ]),
 
   metaWebhookEvents: defineTable({
     teamId: v.string(),

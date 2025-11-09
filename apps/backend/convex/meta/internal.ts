@@ -1,4 +1,4 @@
-import { internalMutation } from "../_generated/server";
+import { internalMutation, internalQuery } from "../_generated/server";
 import { v } from "convex/values";
 
 export const saveMetaForm = internalMutation({
@@ -49,5 +49,23 @@ export const saveMetaForm = internalMutation({
       updatedAt: Date.now(),
     });
     return true;
+  },
+});
+
+export const getPrimaryMetaForms = internalQuery({
+  args: {
+    teamId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { teamId } = args;
+
+    const metaForms = await ctx.db
+      .query("metaForms")
+      .withIndex("byTeamIdAndisprimary", (q) =>
+        q.eq("teamId", teamId).eq("isPrimary", true)
+      )
+      .collect();
+
+    return metaForms;
   },
 });

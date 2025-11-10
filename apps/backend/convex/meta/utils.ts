@@ -37,7 +37,20 @@ export const fetchMetaForms = async (pageId: string, accessToken: string) => {
 export const fetchMetaLeads = async (formId: string, accessToken: string) => {
   const url = new URL(`${META_GRAPH_URL}/${formId}/leads`);
   url.searchParams.append("access_token", accessToken);
+  url.searchParams.append("fields", LEAD_FIELDS.join(","));
 
   const leads = await fetch(url.toString());
   return leads.json();
+};
+
+export const fetchFromUrl = async (url: string) => {
+  const response = await fetch(url);
+  return response.json();
+};
+
+export const normalizeFieldName = (fieldName: string): string => {
+  return fieldName
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 };

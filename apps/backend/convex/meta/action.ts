@@ -1,11 +1,16 @@
 import { v } from "convex/values";
 import { action, internalAction } from "../_generated/server";
 import { httpAction } from "../_generated/server";
-import { fetchMetaPages, fetchMetaForms, fetchMetaLeads } from "./utils";
+import {
+  fetchMetaPages,
+  fetchMetaForms,
+  fetchMetaLeads,
+  fetchFromUrl,
+} from "./utils";
 import { internal } from "../_generated/api";
-import { components } from "../_generated/api";
 import { z } from "zod";
-import { Workpool } from "@convex-dev/workpool";
+
+const FETCH_COUNT = 5;
 
 const MetaPageSchema = z.object({
   id: z.string(),
@@ -19,14 +24,24 @@ const MetaFormSchema = z.object({
   name: z.string(),
 });
 
-const metaWorkpool = new Workpool(components.MetaLeadsWorkpool, {
-  maxParallelism: 5,
-  retryActionsByDefault: true,
-  defaultRetryBehavior: {
-    maxAttempts: 3,
-    initialBackoffMs: 1000,
-    base: 2,
-  },
+const MetaLeadSchema = z.object({
+  id: z.string(),
+  created_time: z.string(),
+  field_data: z
+    .array(
+      z.object({
+        name: z.string(),
+        values: z.array(z.string()),
+      })
+    )
+    .default([]),
+
+  ad_id: z.string(),
+  ad_name: z.string(),
+  adset_id: z.string(),
+  adset_name: z.string(),
+  campaign_id: z.string(),
+  campaign_name: z.string(),
 });
 
 export const handleMetaCallback = action({
@@ -52,17 +67,10 @@ export const handleMetaCallback = action({
     // fetching form of all page and saving in parallel
     await Promise.all(
       metaPages.map((metaPage) =>
-        metaWorkpool.enqueueAction(
-          ctx,
-          internal.meta.action.processPageForms,
-          {
-            teamId,
-            metaPage,
-          },
-          {
-            retry: true,
-          }
-        )
+        ctx.runAction(internal.meta.action.processPageForms, {
+          teamId,
+          metaPage,
+        })
       )
     );
 
@@ -99,20 +107,16 @@ export const processPageForms = internalAction({
 
       await Promise.all(
         metaForms.map((metaForm) =>
-          metaWorkpool.enqueueMutation(
-            ctx,
-            internal.meta.internal.saveMetaForm,
-            {
-              teamId,
-              metaPageId: metaPage.id,
-              pageName: metaPage.name,
-              pageAccessToken: metaPage.access_token,
-              form: {
-                id: metaForm.id,
-                name: metaForm.name,
-              },
-            }
-          )
+          ctx.runMutation(internal.meta.internal.saveMetaForm, {
+            teamId,
+            metaPageId: metaPage.id,
+            pageName: metaPage.name,
+            pageAccessToken: metaPage.access_token,
+            form: {
+              id: metaForm.id,
+              name: metaForm.name,
+            },
+          })
         )
       );
     }
@@ -135,19 +139,12 @@ export const fetchInitialLeads = action({
 
     await Promise.all(
       primaryMetaForms.map((metaForm) =>
-        metaWorkpool.enqueueAction(
-          ctx,
-          internal.meta.action.processFormLeads,
-          {
-            teamId,
-            metaFormId: metaForm._id,
-            formId: metaForm.formId,
-            pageAccessToken: metaForm.pageAccessToken,
-          },
-          {
-            retry: true,
-          }
-        )
+        ctx.runAction(internal.meta.action.processFormLeads, {
+          teamId,
+          metaFormId: metaForm._id,
+          formId: metaForm.formId,
+          pageAccessToken: metaForm.pageAccessToken,
+        })
       )
     );
 
@@ -167,8 +164,49 @@ export const processFormLeads = internalAction({
   handler: async (ctx, args) => {
     const { teamId, metaFormId, formId, pageAccessToken } = args;
 
+    let totalLeads = 0;
+    let fetchCount = 0;
     const leadsResponse = await fetchMetaLeads(formId, pageAccessToken);
-    console.log(leadsResponse);
+
+    if (leadsResponse.data && leadsResponse.data.length > 0) {
+      const parsedLeads = z.array(MetaLeadSchema).parse(leadsResponse.data);
+
+      await Promise.all(
+        parsedLeads.map((lead) =>
+          ctx.runMutation(internal.meta.internal.saveMetaLead, {
+            teamId,
+            metaFormId,
+            formId,
+            lead,
+          })
+        )
+      );
+      totalLeads += parsedLeads.length;
+    }
+    fetchCount++;
+
+    // Fetch and save paginated leads up to FETCH_COUNT times
+    while (leadsResponse.paging?.next && fetchCount < FETCH_COUNT) {
+      const nextLeadsResponse = await fetchFromUrl(leadsResponse.paging.next);
+      if (nextLeadsResponse.data && nextLeadsResponse.data.length > 0) {
+        const parsedLeads = z
+          .array(MetaLeadSchema)
+          .parse(nextLeadsResponse.data);
+
+        await Promise.all(
+          parsedLeads.map((lead) =>
+            ctx.runMutation(internal.meta.internal.saveMetaLead, {
+              teamId,
+              metaFormId,
+              formId,
+              lead,
+            })
+          )
+        );
+        totalLeads += parsedLeads.length;
+      }
+      fetchCount++;
+    }
   },
 });
 

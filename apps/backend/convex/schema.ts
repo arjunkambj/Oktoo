@@ -76,6 +76,13 @@ const schema = defineSchema({
     campaignId: v.string(),
     campaignName: v.string(),
 
+    fieldData: v.array(
+      v.object({
+        name: v.string(),
+        value: v.string(),
+      })
+    ),
+
     capturedAt: v.number(),
     updatedAt: v.number(),
   })

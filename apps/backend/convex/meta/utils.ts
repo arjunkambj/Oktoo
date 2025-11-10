@@ -54,3 +54,34 @@ export const normalizeFieldName = (fieldName: string): string => {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 };
+
+export const subscribeToWebhook = async (
+  pageAccessToken: string,
+  pageId: string
+) => {
+  try {
+    const response = await fetch(
+      `${META_GRAPH_URL}/${pageId}/subscribed_apps`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subscribed_fields: ["leadgen"],
+          access_token: pageAccessToken,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+      console.log("Page subscribed successfully!");
+    } else {
+      console.error("Subscription failed:", data);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};

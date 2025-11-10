@@ -6,6 +6,7 @@ import {
   fetchMetaForms,
   fetchMetaLeads,
   fetchFromUrl,
+  subscribeToWebhook,
 } from "./utils";
 import { internal } from "../_generated/api";
 import { z } from "zod";
@@ -205,6 +206,21 @@ export const processFormLeads = internalAction({
       }
       fetchCount++;
     }
+  },
+});
+
+export const subscribeToWebhookForPages = action({
+  args: {
+    pages: v.array(
+      v.object({ pageAccessToken: v.string(), pageId: v.string() })
+    ),
+  },
+  handler: async (ctx, args) => {
+    await Promise.all(
+      args.pages.map((page) =>
+        subscribeToWebhook(page.pageAccessToken, page.pageId)
+      )
+    );
   },
 });
 
